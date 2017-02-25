@@ -10,7 +10,8 @@ function [lat,lon,r] = OrbitProp(timeseries,SMA,ECC,INC,RAAN,AOP,TA)
     TA = deg2rad(TA);
     
     % Setup initial mean anomaly
-    M0 = TA2M(TA);
+    E0 = atan2(sqrt(1+ECC)*sin(TA),sqrt(1-ECC)*cos(TA));
+    M0 = wrapTo2Pi(E0 - ECC*sin(E0));
 
     %EARTH DATA
     J2 = 0.00108263;
@@ -71,11 +72,5 @@ function [lat,lon,r] = OrbitProp(timeseries,SMA,ECC,INC,RAAN,AOP,TA)
     lon = wrapToPi(lon);
 
     lat=rad2deg(lat);
-    lon=rad2deg(lon);
-    
-    function [M] = TA2M(TA)
-        E = atan2(sqrt(1+ECC)*sin(TA),sqrt(1-ECC)*cos(TA));
-        M = wrapTo2Pi(E - ECC*sin(E));
-    end
-    
+    lon=rad2deg(lon);    
 end
