@@ -1,4 +1,4 @@
-f = fopen('ReportFile2.txt', 'r');
+f = fopen('../ReportFile2.txt', 'r');
 line = fgetl(f);
 i = 1;
 while ischar(line)
@@ -20,4 +20,4 @@ clear line i f val
 earth = wgs84Ellipsoid('km'); % Earth Ellipsoid based on WGS84 Model.
 fov = 5;
 
-coverage_calc(sat_lat(10), sat_lon(10), sat_alt(10), fov, earth)
+coverage_calc(sat_lat(10), sat_lon(10), sat_alt(10), fov, earth);

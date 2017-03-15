@@ -5,15 +5,15 @@ tic
 az = linspace(0, 360, 36);
 [gnd_lat, gnd_lon] = lookAtSpheroid(sat_lat, sat_lon, sat_alt, ...
                                     az, fov, earth);
-worldmap world; load coastlines; plotm(coastlat, coastlon);
+% worldmap world; load coastlines; plotm(coastlat, coastlon);
 % plotm(gnd_lat, gnd_lon, 'r', 'LineWidth', 3);
 % pcolorm(lat, lon, ones(1, numel(lat)));
 % geoshow(lat, lon)
-clear coastlat coastlon
+% clear coastlat coastlon
 
 %%%% Set up Grid %%%%
-e_lat_size = 90;
-e_lon_size = 180;
+e_lat_size = 45;
+e_lon_size = 90;
 
 e_lat = linspace(90, -90, e_lat_size + 2);
 e_lat = e_lat(2:numel(e_lat)-1);
