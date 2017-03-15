@@ -1,37 +1,15 @@
-f = fopen('ReportFile2.txt', 'r');
-line = fgetl(f);
-i = 1;
-while ischar(line)
-    try
-        line = fgetl(f);
-        val = strsplit(line, ' ');
-        sat_lat(i) = str2double(val(1));
-        sat_lon(i) = str2double(val(2));
-        sat_alt(i) = str2double(val(3));
-        i = i + 1;
-    catch
-    end
-end
-fclose('all');
-clear line i f val
+function coverage = coverage_calc(sat_lat, sat_lon, sat_alt, fov, earth)
 
-
-%%%% Setup %%%%
-
-earth = wgs84Ellipsoid('km'); % Earth Ellipsoid based on WGS84 Model.
-fov = 5;
-
+tic
 %%%% Satellite View %%%%
-az = linspace(0, 360, 100);
-[gnd_lat, gnd_lon] = lookAtSpheroid(sat_lat(15), sat_lon(15), ...
-                                    sat_alt(15), az, fov, earth);
+az = linspace(0, 360, 36);
+[gnd_lat, gnd_lon] = lookAtSpheroid(sat_lat, sat_lon, sat_alt, ...
+                                    az, fov, earth);
 worldmap world; load coastlines; plotm(coastlat, coastlon);
 % plotm(gnd_lat, gnd_lon, 'r', 'LineWidth', 3);
 % pcolorm(lat, lon, ones(1, numel(lat)));
 % geoshow(lat, lon)
 clear coastlat coastlon
-
-tic
 
 %%%% Set up Grid %%%%
 e_lat_size = 90;
@@ -44,7 +22,9 @@ e_lon = e_lon(2:numel(e_lon)-1);
 coverage = zeros(e_lat_size, e_lon_size); % Dunno what this does yet?
 ncoverage = zeros(e_lat_size, e_lon_size);
 
-plotm(gnd_lat, gnd_lon, 'r', 'LineWidth', 3);
+toc
+
+% plotm(gnd_lat, gnd_lon, 'r', 'LineWidth', 3);
 
 %%%% Bounding Box %%%%
 
@@ -144,9 +124,11 @@ end
 
 toc
 
-for i = 1:numel(search_lat)
-    plotm(search_lat(i) * ones(1, numel(search_lon)), search_lon, 'm.');
-end
-
+% Plotting of Cartesian grid (Bounding box only)
+% for i = 1:numel(search_lat)
+%     plotm(search_lat(i) * ones(1, numel(search_lon)), search_lon, 'm.');
+% end
 % contourm(e_lat, e_lon, coverage, 'LineWidth', 5)
 
+area = 100 * areaint(gnd_lat, gnd_lon);
+area_grid = 100 * (areamat(coverage, [0.5 90, -180], earth) / 510.1E6);
