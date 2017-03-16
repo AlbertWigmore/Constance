@@ -41,4 +41,7 @@ Thumbs.db
 .idea/*
 
 # Matlab #
+##########
 *.m~
+*.mat
+*.asv
