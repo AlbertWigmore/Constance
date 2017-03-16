@@ -1,4 +1,4 @@
-function coverage = coverage_calc(sat_lat, sat_lon, sat_alt, fov, earth)
+function coverage = CoverageCalc(sat_lat, sat_lon, sat_alt, fov, earth)
 
 tic
 %%%% Satellite View %%%%
@@ -19,7 +19,7 @@ e_lat = linspace(90, -90, e_lat_size + 2);
 e_lat = e_lat(2:numel(e_lat)-1);
 e_lon = linspace(-180, 180, e_lon_size + 2);
 e_lon = e_lon(2:numel(e_lon)-1);
-coverage = zeros(e_lat_size, e_lon_size); % Dunno what this does yet?
+coverage = zeros(e_lat_size, e_lon_size);
 ncoverage = zeros(e_lat_size, e_lon_size);
 
 toc
@@ -65,6 +65,7 @@ switch n
                                      [search_lon(j), search_lon(j)], [gnd_lat NaN], [gnd_lon NaN]);
                 lati = find(e_lat == search_lat(i));
                 loni = find(e_lon == search_lon(j));
+                disp(numel(xi))
                 if xi
                     ncoverage(lati, loni) = ncoverage(lati, loni) + 1;
                 else
@@ -130,5 +131,5 @@ toc
 % end
 % contourm(e_lat, e_lon, coverage, 'LineWidth', 5)
 
-area = 100 * areaint(gnd_lat, gnd_lon);
-area_grid = 100 * (areamat(coverage, [0.5 90, -180], earth) / 510.1E6);
+% area = 100 * areaint(gnd_lat, gnd_lon);
+% area_grid = 100 * (areamat(coverage, [0.5 90, -180], earth) / 510.1E6);
