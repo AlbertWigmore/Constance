@@ -19,9 +19,9 @@ view(60,60)
 axis off
 load coastlines; plotm(coastlat, coastlon);
 
-base = zeros(180,360); baseref = [1 90 0];
-hs = meshm(base,baseref,size(base));
-colormap white;
+% base = zeros(180,360); baseref = [1 90 0];
+% hs = meshm(base,baseref,size(base));
+% colormap white;
 
 plotm(tmp1, tmp2, 'r', 'LineWidth', 3);
 
@@ -29,7 +29,7 @@ plotm(tmp1, tmp2, 'r', 'LineWidth', 3);
 e_lat_size = 45;
 e_lon_size = 90;
 
-e_lat = linspace(90, -90, e_lat_size + 2);
+e_lat = linspace(-90, 90, e_lat_size + 2);
 e_lat = e_lat(2:numel(e_lat)-1);
 e_lon = linspace(-180, 180, e_lon_size + 2);
 e_lon = e_lon(2:numel(e_lon)-1);
@@ -47,7 +47,7 @@ end
 
 gnd_lat = gnd_lat';
 gnd_lon = gnd_lon';
-in = inpolygon(tmp3, tmp4, gnd_lat, gnd_lon)
+in = inpolygon(tmp3, tmp4, tmp1, tmp2);
 
 % Convert back
 k = 1;
@@ -58,5 +58,11 @@ for i = 1:numel(e_lat)
    end
 end
 toc
+
+Z = coverage;
+R = georasterref('RasterSize', size(Z), ...
+  'Latlim', [-90 90], 'Lonlim', [-180 180]);
+meshm(Z, R)
+
 % area = 100 * areaint(gnd_lat, gnd_lon);
 % area_grid = 100 * (areamat(coverage, [0.5 90, -180], earth) / 510.1E6);
