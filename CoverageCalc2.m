@@ -11,21 +11,28 @@ gnd_lon = gnd_lon';
 tmp1 = [NaN];
 tmp2 = [NaN];
 for i = 1:numel(sat_lat)
-    A = gnd_lat(i, :); A(A > 1) = 1; A(A < 1) = 0;
-    if numel(find(diff(A) ~= 0)) == 2 % Crossing -180 to 180
-        disp('Equator')
-        gnd_lon(i, gnd_lon(i, :) > 0)
-        gnd_lon(i, gnd_lon(i, :) < 0)
-    end
-    if numel(find(diff(A) ~= 0)) == 1 
+    gnd_lon(i, :)
+    A = gnd_lon(i, :); A(A > 1) = 1; A(A < 1) = 0;
+    if numel(find(diff(A) ~= 0)) == 2 && max(gnd_lon(i, :)) - min(gnd_lon(i, :)) > 180.0
         if mean(gnd_lat(i, :)) > 0 % North Pole
             disp('North')
-        else % South Pole
+            tmp1 = [tmp1, gnd_lat(i, :), NaN];
+            tmp2 = [tmp2, gnd_lon(i, :), NaN];
+        elseif mean(gnd_lat(i, :)) < 0 % South Pole
             disp('South')
+            tmp1 = [tmp1, gnd_lat(i, :), NaN];
+            tmp2 = [tmp2, gnd_lon(i, :), NaN];
         end
+    elseif numel(find(diff(A) ~= 0)) == 2 % Crossing -180 to 180 ???
+        disp('Equator')
+        % gnd_lon(i, gnd_lon(i, :) > 0)
+        % gnd_lon(i, gnd_lon(i, :) < 0)
+        tmp1 = [tmp1, gnd_lat(i, :), NaN];
+        tmp2 = [tmp2, gnd_lon(i, :), NaN];
+    else
+        tmp1 = [tmp1, gnd_lat(i, :), NaN];
+        tmp2 = [tmp2, gnd_lon(i, :), NaN]; 
     end
-    tmp1 = [tmp1, gnd_lat(i, :), NaN];
-    tmp2 = [tmp2, gnd_lon(i, :), NaN];
 end
 
 axesm ('globe','Grid', 'on');

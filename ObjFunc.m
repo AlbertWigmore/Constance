@@ -1,8 +1,8 @@
 function [] = ObjFunc()
 
 tsteps = [0:0.01:1];
-tsteps = [0, 0.0001];
-[S_lat, S_lon, rmag] = OrbitProp(tsteps, 36000+6371, 0.01, 0.1, 0, 270, 0);
+tsteps = 0.2
+[S_lat, S_lon, rmag] = OrbitProp(tsteps, 20659+6371, 0.5, 63.4, 0, 90, 0);
 
 earth = wgs84Ellipsoid('km'); % Earth Ellipsoid based on WGS84 Model.
 fov = 7; % FoV of sensor
