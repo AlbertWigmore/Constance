@@ -11,22 +11,21 @@ gnd_lon = gnd_lon';
 tmp1 = [NaN];
 tmp2 = [NaN];
 for i = 1:numel(sat_lat)
-    gnd_lon(i, :)
     A = gnd_lon(i, :); A(A > 1) = 1; A(A < 1) = 0;
-    if numel(find(diff(A) ~= 0)) == 2 && max(gnd_lon(i, :)) - min(gnd_lon(i, :)) > 180.0
+    if numel(find(diff(A) ~= 0)) == 2 && max(gnd_lon(i, :)) - min(gnd_lon(i, :)) > 180.0 % This isn't a sufficent check
         if mean(gnd_lat(i, :)) > 0 % North Pole
-            disp('North')
-            tmp1 = [tmp1, gnd_lat(i, :), NaN];
-            tmp2 = [tmp2, gnd_lon(i, :), NaN];
+            [gnd_lon(i, :), sortindex] = sort(gnd_lon(i, :));
+            gnd_lat(i, :) = gnd_lat(i, (sortindex));            
+            tmp1 = [tmp1, gnd_lat(i, :), gnd_lat(i, end), 90, 90, gnd_lat(i, 1), NaN];
+            tmp2 = [tmp2, gnd_lon(i, :), 180, 180, -180, -180, NaN];
         elseif mean(gnd_lat(i, :)) < 0 % South Pole
-            disp('South')
-            tmp1 = [tmp1, gnd_lat(i, :), NaN];
-            tmp2 = [tmp2, gnd_lon(i, :), NaN];
+            [gnd_lon(i, :), sortindex] = sort(gnd_lon(i, :));
+            gnd_lat(i, :) = gnd_lat(i, (sortindex));            
+            tmp1 = [tmp1, gnd_lat(i, :), gnd_lat(i, end), -90, -90, gnd_lat(i, 1), NaN];
+            tmp2 = [tmp2, gnd_lon(i, :), 180, 180, -180, -180, NaN];
         end
     elseif numel(find(diff(A) ~= 0)) == 2 % Crossing -180 to 180 ???
-        disp('Equator')
-        % gnd_lon(i, gnd_lon(i, :) > 0)
-        % gnd_lon(i, gnd_lon(i, :) < 0)
+        disp('Equator')   
         tmp1 = [tmp1, gnd_lat(i, :), NaN];
         tmp2 = [tmp2, gnd_lon(i, :), NaN];
     else
@@ -66,8 +65,6 @@ for i = 1:numel(e_lat)
     end
 end
 
-gnd_lat = gnd_lat';
-gnd_lon = gnd_lon';
 in = inpolygon(tmp3, tmp4, tmp1, tmp2);
 
 % Convert back
