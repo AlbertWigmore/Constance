@@ -5,6 +5,7 @@ function [lat,lon,r] = OrbitProp(timeseries,sat)
 
     % Turn into rads
     INC = deg2rad(sat.INC); % [rad]
+    INC(INC==0)=0.0000001;
     AOP0 = deg2rad(sat.AOP);
     RAAN0 = deg2rad(sat.RAAN);
     TA = deg2rad(sat.TA);
