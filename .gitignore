@@ -42,3 +42,5 @@ Thumbs.db
 
 # Matlab #
 *.m~
+*.mat
+*.asv
