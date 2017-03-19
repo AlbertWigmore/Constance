@@ -1,135 +1,100 @@
-function coverage = CoverageCalc(sat_lat, sat_lon, sat_alt, fov, earth)
+tsteps = 0:0.001:1;
+
+[sat_lat, sat_lon, sat_alt] = OrbitProp(tsteps, 600+6371, 0.5, 50.0, 80, 90, 0);
+earth = wgs84Ellipsoid('km'); % Earth Ellipsoid based on WGS84 Model.
+fov = 5; % FoV of sensor
 
 tic
 %%%% Satellite View %%%%
 az = linspace(0, 360, 36);
 [gnd_lat, gnd_lon] = lookAtSpheroid(sat_lat, sat_lon, sat_alt, ...
-                                    az, fov, earth);
-% worldmap world; load coastlines; plotm(coastlat, coastlon);
-% plotm(gnd_lat, gnd_lon, 'r', 'LineWidth', 3);
-% pcolorm(lat, lon, ones(1, numel(lat)));
-% geoshow(lat, lon)
-% clear coastlat coastlon
-
+                                    (ones(numel(sat_lat), 1) * az)', ... 
+                                    fov, earth);
 %%%% Set up Grid %%%%
-e_lat_size = 45;
-e_lon_size = 90;
+e_lat_size = 300;
+e_lon_size = 300;
 
-e_lat = linspace(90, -90, e_lat_size + 2);
-e_lat = e_lat(2:numel(e_lat)-1);
+e_lat = linspace(-90, 90, e_lat_size + 2);
 e_lon = linspace(-180, 180, e_lon_size + 2);
-e_lon = e_lon(2:numel(e_lon)-1);
-coverage = zeros(e_lat_size, e_lon_size);
-ncoverage = zeros(e_lat_size, e_lon_size);
+coverage = zeros(e_lon_size + 2, e_lat_size + 2);
+[grid_lat, grid_lon] = meshgrid(e_lat, e_lon);
 
+%%%% 
+for i = 1:numel(sat_lat)
+    A = gnd_lon(:, i); A(A > 0) = 1; A(A < 0) = 0;
+    x = find(diff(A) ~= 0);
+    y = abs(diff(gnd_lon(:, i)));
+    y = y(y > 180);
+    
+    if numel(x) == 2 && numel(y) == 1
+        if mean(gnd_lat(:, i)) > 0 
+            % North Pole
+            [gnd_lon(:, i), sortindex] = sort(gnd_lon(:, i));
+            gnd_lat(:, i) = gnd_lat(sortindex, i);
+            tmp1 = [gnd_lat(:, i); gnd_lat(end, i); 90; 90; gnd_lat(1, i)];
+            tmp2 = [gnd_lon(:, i); 180; 180; -180; -180];
+            coverage = coverage + inpolygon(grid_lat, grid_lon, tmp1, tmp2);
+        elseif mean(gnd_lat(:, i)) < 0 
+            % South Pole
+            % disp('S')
+            [gnd_lon(:, i), sortindex] = sort(gnd_lon(:, i));
+            gnd_lat(:, i) = gnd_lat(sortindex, i);            
+            tmp1 = [gnd_lat(:, i); gnd_lat(end, i); -90; -90; gnd_lat(1, i)];
+            tmp2 = [gnd_lon(:, i); 180; 180; -180; -180];
+            coverage = coverage + inpolygon(grid_lat, grid_lon, tmp1, tmp2);     
+        end
+    elseif numel(x) == 2 && numel(y) == 2 
+        % Add geometry points to fix the overlap
+        tmp7 = [gnd_lat(1:x(1), i); gnd_lat(x(1), i); ...
+                gnd_lat(x(1) + 1, i); gnd_lat(x(1) + 1:x(2), i); ...
+                gnd_lat(x(2), i); gnd_lat(x(2)+1, i); ...
+                gnd_lat(x(2) + 1:end, i)];
+        tmp8 = [gnd_lon(1:x(1), i); 180; -180; gnd_lon(x(1) + 1:x(2), i); ...
+                -180; 180; gnd_lon(x(2) + 1:end, i)];
+            
+        % Eastern Hemisphere
+        tmp3 = tmp7(sign(tmp8) > 0);
+        tmp4 = tmp8(sign(tmp8) > 0);
+        
+        %tmp3 = gnd_lat(sign(gnd_lon(:, i)) > 0, i);
+        %tmp4 = gnd_lon(sign(gnd_lon(:, i)) > 0, i);
+        %tmp4 = [tmp4(1:m); 180; 180; tmp4(m+1:end)];
+        %tmp3 = [tmp3(1:m); tmp3(mod(m-1, numel(tmp3))+1); ...
+        %        tmp3(mod(m, numel(tmp3))+1); tmp3(m+1:end)];
+        
+        coverage = coverage + inpolygon(grid_lat, grid_lon, tmp3, tmp4);
+        
+        % Western Hemisphere
+        tmp3 = tmp7(sign(tmp8) < 0);
+        tmp4 = tmp8(sign(tmp8) < 0);
+        
+        %tmp3 = gnd_lat(sign(gnd_lon(:, i)) < 0, i);
+        %tmp4 = gnd_lon(sign(gnd_lon(:, i)) < 0, i);       
+        %[~, m] = min(tmp4);
+        %tmp4 = [tmp4(1:m); -180; -180; tmp4(m+1:end)];
+        %tmp3 = [tmp3(1:m); tmp3(mod(m-1, numel(tmp3))+1); ...
+        %        tmp3(mod(m, numel(tmp3))+1); tmp3(m+1:end)];
+        
+        
+        coverage = coverage + inpolygon(grid_lat, grid_lon, tmp3, tmp4);
+    else
+        coverage = coverage + inpolygon(grid_lat, grid_lon, gnd_lat(:, i), gnd_lon(:, i));
+    end
+   
+end
+% clear tmp1 tmp2 tmp3 tmp4 tmp5 tmp6 x y A
 toc
 
-% plotm(gnd_lat, gnd_lon, 'r', 'LineWidth', 3);
+axesm ('globe','Grid', 'on');
+view(60,60)
+axis off
+load coastlines; plotm(coastlat, coastlon);
 
-%%%% Bounding Box %%%%
+base = zeros(180,360); baseref = [1 90 0];
+hs = meshm(base,baseref,size(base));
+colormap white;
 
-% Determine bounding box
-max_gnd_lat = max(gnd_lat); min_gnd_lat = min(gnd_lat);
-max_gnd_lon = max(gnd_lon); min_gnd_lon = min(gnd_lon);
+plotm(gnd_lat, gnd_lon, 'r', 'LineWidth', 3);
+plotm(grid_lat(coverage == 1), grid_lon(coverage == 1),'m.');
+plotm(grid_lat(coverage >= 1), grid_lon(coverage >= 1),'b.');
 
-% Check to see whether North/South or other
-n = 0; % Default case
-if max_gnd_lon - min_gnd_lon > 180.0 && mean(gnd_lat) > 0
-    n = 'N';
-elseif max_gnd_lon - min_gnd_lon > 180.0 && mean(gnd_lat) < 0
-    n = 'S';
-end
-
-if n ~= 0
-   % Rearrange longitudes to be in order -180 to 180 to fix North/South
-    tmp = [gnd_lat; gnd_lon];
-    [~, I] = sort(tmp(2,:));
-    tmp = tmp(:, I);
-    gnd_lat = tmp(1, :);
-    gnd_lon = tmp(2, :);
-    clear tmp Y I 
-end
-
-%%%% Determining points inside coverage %%%%
-switch n
-    case 'N'
-        %%% North Pole %%%
-        
-        % Find valid Latitudes, Longitudes to search
-        search_lat = e_lat(find(e_lat > min_gnd_lat));
-        search_lon = e_lon;
-        
-        for i = 1:numel(search_lat)
-            for j = 1:numel(search_lon)
-                [xi, yi] = polyxpoly([search_lat(i), 90], ...
-                                     [search_lon(j), search_lon(j)], [gnd_lat NaN], [gnd_lon NaN]);
-                lati = find(e_lat == search_lat(i));
-                loni = find(e_lon == search_lon(j));
-                disp(numel(xi))
-                if xi
-                    ncoverage(lati, loni) = ncoverage(lati, loni) + 1;
-                else
-                    coverage(lati, loni) = coverage(lati, loni) + 1;
-                end
-                
-            end            
-        end
-    case 'S'
-        %%% South Pole %%%
-        
-        % Find valid Latitudes, Longitudes to search
-        search_lat = e_lat(find(e_lat < max_gnd_lat));
-        search_lon = e_lon;
-        
-        for i = 1:numel(search_lat)
-            for j = 1:numel(search_lon)
-                [xi, yi] = polyxpoly([search_lat(i), -90], ...
-                                     [search_lon(j), search_lon(j)], [gnd_lat NaN], [gnd_lon NaN]);
-                lati = find(e_lat == search_lat(i));
-                loni = find(e_lon == search_lon(j));
-                if xi
-                    ncoverage(lati, loni) = ncoverage(lati, loni) + 1;
-                else
-                    coverage(lati, loni) = coverage(lati, loni) + 1;
-                end
-                
-            end            
-        end
-    otherwise
-        %%% Standard Case %%%
-        
-        % Find valid latitudes to search
-        search_lat = e_lat(find(e_lat < max_gnd_lat));
-        search_lat = search_lat(find(search_lat > min_gnd_lat));
-
-        % Find valid longitudes to search
-        search_lon = e_lon(find(e_lon < max_gnd_lon));
-        search_lon = search_lon(find(search_lon > min_gnd_lon));
-        
-        % Determine which points intersect
-        for i = 1:numel(search_lat)
-            for j = 1:numel(search_lon)
-                [xi, yi] = polyxpoly([search_lat(i), 90], ...
-                                     [search_lon(j), search_lon(j)], gnd_lat, gnd_lon);
-                lati = find(e_lat == search_lat(i));
-                loni = find(e_lon == search_lon(j));
-                if numel(xi) == 1
-                    coverage(lati, loni) = coverage(lati, loni) + 1;
-                else
-                    ncoverage(lati, loni) = ncoverage(lati, loni) + 1;
-                end
-                
-            end            
-        end
-end
-
-toc
-
-% Plotting of Cartesian grid (Bounding box only)
-% for i = 1:numel(search_lat)
-%     plotm(search_lat(i) * ones(1, numel(search_lon)), search_lon, 'm.');
-% end
-% contourm(e_lat, e_lon, coverage, 'LineWidth', 5)
-
-% area = 100 * areaint(gnd_lat, gnd_lon);
-% area_grid = 100 * (areamat(coverage, [0.5 90, -180], earth) / 510.1E6);
