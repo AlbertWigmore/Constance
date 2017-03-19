@@ -1,7 +1,14 @@
 function [] = ObjFunc()
 
+sat1.SMA= 6878;
+sat1.ECC = 0;
+sat1.INC = 98;
+sat1.RAAN = 201;
+sat1.AOP = 360;
+sat1.TA = 0;
+
 tsteps = [0:0.001:1];
-[S_lat, S_lon, rmag] = OrbitProp(tsteps, 400+6371, 0.0, 53.0, 0, 90, 0);
+[S_lat, S_lon, rmag] = OrbitProp(tsteps, sat1);
 
 earth = wgs84Ellipsoid('km'); % Earth Ellipsoid based on WGS84 Model.
 fov = 10; % FoV of sensor
