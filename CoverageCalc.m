@@ -49,9 +49,10 @@ for i = 1:numel(sat_lat)
     else
         coverage = coverage + inpolygon(grid_lat, grid_lon, gnd_lat(:, i), gnd_lon(:, i));
     end
-   
 end
-%%%% Plotting %%%%
+coverage(coverage > 1) = 1;
+
+%%%% Plotting (Redundant) %%%%
 % axesm ('globe','Grid', 'on');
 % view(60,60)
 % axis off

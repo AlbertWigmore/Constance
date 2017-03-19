@@ -29,10 +29,12 @@ view(60,60)
 axis off
 load coastlines; plotm(coastlat, coastlon);
 
-base = zeros(180,360); baseref = [1 90 0];
-hs = meshm(base,baseref,size(base));
-colormap white;
+%base = zeros(180,360); baseref = [1 90 0];
+%hs = meshm(base,baseref,size(base));
+%colormap white;
+plotm(grid_lat(coverage == 1), grid_lon(coverage == 1),'m+');
 
-% plotm(gnd_lat, gnd_lon, 'r', 'LineWidth', 3); 
-plotm(grid_lat(coverage == 1), grid_lon(coverage == 1),'m.');
-plotm(grid_lat(coverage >= 1), grid_lon(coverage >= 1),'b.');
+R = georasterref('RasterSize', size(coverage'), ...
+  'Latlim', [-90 90], 'Lonlim', [-180 180]);
+meshm(coverage', R);
+
