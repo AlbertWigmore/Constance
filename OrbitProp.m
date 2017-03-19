@@ -5,7 +5,7 @@ function [lat,lon,r] = OrbitProp(timeseries,sat)
 
     % Turn into rads
     INC = deg2rad(sat.INC); % [rad]
-    INC(INC==0)=0.0000001;
+    INC(INC<=0)=0.0000001;
     AOP0 = deg2rad(sat.AOP);
     RAAN0 = deg2rad(sat.RAAN);
     TA = deg2rad(sat.TA);
@@ -51,6 +51,9 @@ function [lat,lon,r] = OrbitProp(timeseries,sat)
 
     nu(iii) = 2*atan(sqrt(1+sat.ECC)/sqrt(1-sat.ECC)*tan(E/2));
     r(iii) = sat.SMA*(1-sat.ECC^2)/(1+sat.ECC*cos(nu(iii)));
+    if r(iii) <= R_e
+        error('Orbit intersects with planet! Change SMA and/or ECC')
+    end
 
     lamb_gw(iii) = wrapTo2Pi(lamb_gw_0 + We*T_now);
     
