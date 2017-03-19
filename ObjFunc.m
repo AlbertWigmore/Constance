@@ -1,15 +1,11 @@
 function [] = ObjFunc()
 
-tsteps = [0:0.0001:0.1];
+tsteps = [0:0.001:1];
 [S_lat, S_lon, rmag] = OrbitProp(tsteps, 400+6371, 0.0, 53.0, 0, 90, 0);
 
 earth = wgs84Ellipsoid('km'); % Earth Ellipsoid based on WGS84 Model.
 fov = 10; % FoV of sensor
-e_lat_size = 45; % Currently hardcoded in CoverageCalc
-e_lon_size = 90; % Currently hardcoded in CoverageCalc
-coverage = zeros(e_lat_size, e_lon_size); 
-
-coverage = CoverageCalc2(S_lat, S_lon, rmag, fov, earth);
+coverage = CoverageCalc(S_lat, S_lon, rmag, fov, earth);
 
 %% Plotting for verification
 worldmap world; load coastlines; plotm(coastlat, coastlon);
