@@ -1,18 +1,10 @@
-function [coverage] = CoverageCalc(sat_lat, sat_lon, sat_alt, fov, earth);
+function coverage = CoverageCalc(sat_lat, sat_lon, sat_alt, grid_lat, grid_lon, coverage, fov, earth);
 %%%% Satellite View %%%%
 az = linspace(0, 360, 36);
 [gnd_lat, gnd_lon] = lookAtSpheroid(sat_lat, sat_lon, sat_alt, ...
                                     (ones(numel(sat_lat), 1) * az)', ... 
                                     fov, earth);
-%%%% Set up Grid %%%%
-e_lat_size = 300;
-e_lon_size = 300;
-
-e_lat = linspace(-90, 90, e_lat_size + 2);
-e_lon = linspace(-180, 180, e_lon_size + 2);
-coverage = zeros(e_lon_size + 2, e_lat_size + 2);
-[grid_lat, grid_lon] = meshgrid(e_lat, e_lon);
-
+                                
 %%%% Determine points inside satellite FoV %%%% 
 for i = 1:numel(sat_lat)
     A = gnd_lon(:, i); A(A > 0) = 1; A(A < 0) = 0;
@@ -59,7 +51,7 @@ for i = 1:numel(sat_lat)
     end
    
 end
-
+%%%% Plotting %%%%
 % axesm ('globe','Grid', 'on');
 % view(60,60)
 % axis off
