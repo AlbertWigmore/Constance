@@ -1,4 +1,5 @@
-function x = CoverageCalc(sat_lat, sat_lon, sat_alt, grid_lat, grid_lon, coverage, tsteps, fov, earth);
+function x = CoverageCalc(sat_lat, sat_lon, sat_alt, sat, grid_lat, grid_lon, coverage, tsteps, fov, earth);
+tic
 %%%% Satellite View %%%%
 az = linspace(0, 360, 36);
 [gnd_lat, gnd_lon] = lookAtSpheroid(sat_lat, sat_lon, sat_alt, ...
@@ -21,14 +22,14 @@ for i = 1:numel(sat_lat)
             gnd_lat(:, i) = gnd_lat(sortindex, i);
             tmp1 = [gnd_lat(:, i); gnd_lat(end, i); 90; 90; gnd_lat(1, i)];
             tmp2 = [gnd_lon(:, i); 180; 180; -180; -180];
-            coverage = inpolygon(grid_lat, grid_lon, tmp1, tmp2);
+            tmp_coverage = inpolygon(grid_lat, grid_lon, tmp1, tmp2);
         elseif mean(gnd_lat(:, i)) < 0 
             % South Pole
             [gnd_lon(:, i), sortindex] = sort(gnd_lon(:, i));
             gnd_lat(:, i) = gnd_lat(sortindex, i);            
             tmp1 = [gnd_lat(:, i); gnd_lat(end, i); -90; -90; gnd_lat(1, i)];
             tmp2 = [gnd_lon(:, i); 180; 180; -180; -180];
-            coverage = inpolygon(grid_lat, grid_lon, tmp1, tmp2);     
+            tmp_coverage = inpolygon(grid_lat, grid_lon, tmp1, tmp2);     
         end
     elseif numel(x) == 2 && numel(y) == 2 
         % Add geometry points to fix the overlap
@@ -42,22 +43,38 @@ for i = 1:numel(sat_lat)
         % Eastern Hemisphere
         tmp3 = tmp7(sign(tmp8) > 0);
         tmp4 = tmp8(sign(tmp8) > 0);
-        coverage = inpolygon(grid_lat, grid_lon, tmp3, tmp4);
+        tmp_coverage = inpolygon(grid_lat, grid_lon, tmp3, tmp4);
         
         % Western Hemisphere
         tmp3 = tmp7(sign(tmp8) < 0);
         tmp4 = tmp8(sign(tmp8) < 0);
-        coverage = coverage + inpolygon(grid_lat, grid_lon, tmp3, tmp4);
+        tmp_coverage = tmp_coverage + inpolygon(grid_lat, grid_lon, tmp3, tmp4);
     else
-        coverage = inpolygon(grid_lat, grid_lon, gnd_lat(:, i), gnd_lon(:, i));
+        tmp_coverage = inpolygon(grid_lat, grid_lon, gnd_lat(:, i), gnd_lon(:, i));
     end
-    time(:, :, i) = (coverage + 0) .* tsteps(i); % Add zero because MATLAB!
-    
+    coverage = coverage + tmp_coverage;
+    test = time(:, :, i);
+    test(tmp_coverage == 1) = tsteps(i);
+    time(:, :, i) = test;
+    % time(:, :, i) = (tmp_coverage + 0) * tsteps(i); % Add zero because MATLAB!
+end
+toc
+% Calulated all points seen and set to one
+coverage(coverage > 1) = 1;
+
+% Calculate overlap by counting differences in time > orbit period
+orbit = 2*pi*sqrt((sat.SMA*1000)^3/3.986E14)/60/60/24;
+for i = 1:numel(grid_lon(:, 1))
+    for j = 1:numel(grid_lat(1, :))
+        coverage(i, j) = coverage(i, j) + sum(diff(setdiff(time(i, j, :), NaN)) > 0.3*orbit);
+        %diff(setdiff(time(i, j, :), NaN)) > orbit
+    end
 end
 
-x.coverage = 1;
+x.coverage = coverage;
 x.area = 1;
-x.time = 1;
+x.time = time;
+toc
 
 %%%% Plotting (Redundant) %%%%
 % axesm ('globe','Grid', 'on');
