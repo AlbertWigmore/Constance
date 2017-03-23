@@ -1,10 +1,12 @@
-function coverage = CoverageCalc(sat_lat, sat_lon, sat_alt, grid_lat, grid_lon, coverage, fov, earth);
+function x = CoverageCalc(sat_lat, sat_lon, sat_alt, grid_lat, grid_lon, coverage, tsteps, fov, earth);
 %%%% Satellite View %%%%
 az = linspace(0, 360, 36);
 [gnd_lat, gnd_lon] = lookAtSpheroid(sat_lat, sat_lon, sat_alt, ...
                                     (ones(numel(sat_lat), 1) * az)', ... 
                                     fov, earth);
-                                
+
+time = NaN(numel(grid_lon(:, 1)), numel(grid_lat(1, :)), numel(tsteps));
+
 %%%% Determine points inside satellite FoV %%%% 
 for i = 1:numel(sat_lat)
     A = gnd_lon(:, i); A(A > 0) = 1; A(A < 0) = 0;
@@ -19,14 +21,14 @@ for i = 1:numel(sat_lat)
             gnd_lat(:, i) = gnd_lat(sortindex, i);
             tmp1 = [gnd_lat(:, i); gnd_lat(end, i); 90; 90; gnd_lat(1, i)];
             tmp2 = [gnd_lon(:, i); 180; 180; -180; -180];
-            coverage = coverage + inpolygon(grid_lat, grid_lon, tmp1, tmp2);
+            coverage = inpolygon(grid_lat, grid_lon, tmp1, tmp2);
         elseif mean(gnd_lat(:, i)) < 0 
             % South Pole
             [gnd_lon(:, i), sortindex] = sort(gnd_lon(:, i));
             gnd_lat(:, i) = gnd_lat(sortindex, i);            
             tmp1 = [gnd_lat(:, i); gnd_lat(end, i); -90; -90; gnd_lat(1, i)];
             tmp2 = [gnd_lon(:, i); 180; 180; -180; -180];
-            coverage = coverage + inpolygon(grid_lat, grid_lon, tmp1, tmp2);     
+            coverage = inpolygon(grid_lat, grid_lon, tmp1, tmp2);     
         end
     elseif numel(x) == 2 && numel(y) == 2 
         % Add geometry points to fix the overlap
@@ -40,17 +42,22 @@ for i = 1:numel(sat_lat)
         % Eastern Hemisphere
         tmp3 = tmp7(sign(tmp8) > 0);
         tmp4 = tmp8(sign(tmp8) > 0);
-        coverage = coverage + inpolygon(grid_lat, grid_lon, tmp3, tmp4);
+        coverage = inpolygon(grid_lat, grid_lon, tmp3, tmp4);
         
         % Western Hemisphere
         tmp3 = tmp7(sign(tmp8) < 0);
         tmp4 = tmp8(sign(tmp8) < 0);
         coverage = coverage + inpolygon(grid_lat, grid_lon, tmp3, tmp4);
     else
-        coverage = coverage + inpolygon(grid_lat, grid_lon, gnd_lat(:, i), gnd_lon(:, i));
+        coverage = inpolygon(grid_lat, grid_lon, gnd_lat(:, i), gnd_lon(:, i));
     end
+    time(:, :, i) = (coverage + 0) .* tsteps(i); % Add zero because MATLAB!
+    
 end
-coverage(coverage > 1) = 1;
+
+x.coverage = 1;
+x.area = 1;
+x.time = 1;
 
 %%%% Plotting (Redundant) %%%%
 % axesm ('globe','Grid', 'on');
