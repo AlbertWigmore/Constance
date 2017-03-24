@@ -1,4 +1,4 @@
-function x = CoverageCalc(sat_lat, sat_lon, sat_alt, sat, grid_lat, grid_lon, coverage, tsteps, fov, earth);
+function ret = CoverageCalc(sat_lat, sat_lon, sat_alt, sat, grid_lat, grid_lon, coverage, tsteps, fov, earth);
 tic
 %%%% Satellite View %%%%
 az = linspace(0, 360, 36);
@@ -64,17 +64,21 @@ coverage(coverage > 1) = 1;
 
 % Calculate overlap by counting differences in time > orbit period
 orbit = 2*pi*sqrt((sat.SMA*1000)^3/3.986E14)/60/60/24;
-for i = 1:numel(grid_lon(:, 1))
-    for j = 1:numel(grid_lat(1, :))
-        coverage(i, j) = coverage(i, j) + sum(diff(setdiff(time(i, j, :), NaN)) > 0.3*orbit);
-        %diff(setdiff(time(i, j, :), NaN)) > orbit
-    end
-end
 
-x.coverage = coverage;
-x.area = 1;
-x.time = time;
+time = sort(time, 3);
+time_diff = (time(:, :, 2:end) - time(:, :, 1:end-1)) > 0.3 * orbit;
+coverage = coverage + sum(time_diff(:, :, :), 3);
+
+% for i = 1:numel(grid_lon(:, 1))
+%     for j = 1:numel(grid_lat(1, :))
+%         coverage(i, j) = coverage(i, j) + sum(diff(setdiff(time(i, j, :), NaN)) > 0.3*orbit);
+%     end
+% end
+
 toc
+ret.coverage = coverage;
+ret.area = 1;
+ret.time = time;
 
 %%%% Plotting (Redundant) %%%%
 % axesm ('globe','Grid', 'on');

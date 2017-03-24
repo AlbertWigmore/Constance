@@ -14,12 +14,12 @@ fov = 10; % FoV of sensor
 %%%% Orbit Propagation %%%%
 sat.SMA= 6878;
 sat.ECC = 0;
-sat.INC = 98;
+sat.INC = 53.4;
 sat.RAAN = 110;
 sat.AOP = 360;
 sat.TA = 0;
 
-tsteps = [0:0.001:0.4];
+tsteps = [0:0.001:0.1];
 [S_lat, S_lon, rmag] = OrbitProp(tsteps, sat);
 c = CoverageCalc(S_lat, S_lon, rmag, sat, grid_lat, grid_lon, ...
                         coverage, tsteps, fov, earth);
