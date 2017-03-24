@@ -1,11 +1,9 @@
 function ret = CoverageCalc(sat_lat, sat_lon, sat_alt, sat, grid_lat, grid_lon, coverage, tsteps, fov, earth);
-tic
 %%%% Satellite View %%%%
 az = linspace(0, 360, 36);
 [gnd_lat, gnd_lon] = lookAtSpheroid(sat_lat, sat_lon, sat_alt, ...
                                     (ones(numel(sat_lat), 1) * az)', ... 
                                     fov, earth);
-
 time = NaN(numel(grid_lon(:, 1)), numel(grid_lat(1, :)), numel(tsteps));
 
 %%%% Determine points inside satellite FoV %%%% 
@@ -56,40 +54,17 @@ for i = 1:numel(sat_lat)
     test = time(:, :, i);
     test(tmp_coverage == 1) = tsteps(i);
     time(:, :, i) = test;
-    % time(:, :, i) = (tmp_coverage + 0) * tsteps(i); % Add zero because MATLAB!
 end
-toc
 % Calulated all points seen and set to one
 coverage(coverage > 1) = 1;
 
-% Calculate overlap by counting differences in time > orbit period
+% Calculate orbit period in same units as time input
 orbit = 2*pi*sqrt((sat.SMA*1000)^3/3.986E14)/60/60/24;
 
+% Calculate all points that are visited multiple times
 time = sort(time, 3);
-time_diff = (time(:, :, 2:end) - time(:, :, 1:end-1)) > 0.3 * orbit;
+time_diff = (time(:, :, 2:end) - time(:, :, 1:end-1)) > 0.5 * orbit;
 coverage = coverage + sum(time_diff(:, :, :), 3);
 
-% for i = 1:numel(grid_lon(:, 1))
-%     for j = 1:numel(grid_lat(1, :))
-%         coverage(i, j) = coverage(i, j) + sum(diff(setdiff(time(i, j, :), NaN)) > 0.3*orbit);
-%     end
-% end
-
-toc
 ret.coverage = coverage;
-ret.area = 1;
 ret.time = time;
-
-%%%% Plotting (Redundant) %%%%
-% axesm ('globe','Grid', 'on');
-% view(60,60)
-% axis off
-% load coastlines; plotm(coastlat, coastlon);
-% 
-% base = zeros(180,360); baseref = [1 90 0];
-% hs = meshm(base,baseref,size(base));
-% colormap white;
-% 
-% plotm(gnd_lat, gnd_lon, 'r', 'LineWidth', 3);
-% plotm(grid_lat(coverage == 1), grid_lon(coverage == 1),'m.');
-% plotm(grid_lat(coverage >= 1), grid_lon(coverage >= 1),'b.');
