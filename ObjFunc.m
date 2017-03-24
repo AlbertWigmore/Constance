@@ -19,9 +19,15 @@ for i = 1:numel(sat)
                        tsteps, fov, earth);
     coverage = coverage + out.coverage;
 end
+R = georasterref('RasterSize', size(coverage'), ...
+  'Latlim', [-90 90], 'Lonlim', [-180 180]);
 
-f = 0; % Cost function
-p = 0; % Penalty function
+area = 100 * (areamat(coverage >= 1, R, earth) / 510.1E6)
+overlap = 100 * (areamat(coverage > 1, R, earth) / 510.1E6)
+
+f = -area; % Cost function
+p = overlap; % Penalty function
+
 phi = f + p;
 
-phi = coverage;
+phi = coverage; 
