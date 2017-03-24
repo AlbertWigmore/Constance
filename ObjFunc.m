@@ -14,10 +14,9 @@ fov = 10; % FoV of sensor
 
 tsteps = [0:0.001:0.1];
 for i = 1:numel(sat)
-    % sat(i)
     [S_lat, S_lon, rmag] = OrbitProp(tsteps, sat(i));
     out = CoverageCalc(S_lat, S_lon, rmag, sat(i), grid_lat, grid_lon, ...
-                       coverage, tsteps, fov, earth);
+                       tsteps, fov, earth);
     coverage = coverage + out.coverage;
 end
 

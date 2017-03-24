@@ -1,9 +1,10 @@
-function ret = CoverageCalc(sat_lat, sat_lon, sat_alt, sat, grid_lat, grid_lon, coverage, tsteps, fov, earth);
+function ret = CoverageCalc(sat_lat, sat_lon, sat_alt, sat, grid_lat, grid_lon, tsteps, fov, earth);
 %%%% Satellite View %%%%
 az = linspace(0, 360, 36);
 [gnd_lat, gnd_lon] = lookAtSpheroid(sat_lat, sat_lon, sat_alt, ...
                                     (ones(numel(sat_lat), 1) * az)', ... 
                                     fov, earth);
+coverage = zeros(numel(grid_lon(:, 1)), numel(grid_lat(1, :)));
 time = NaN(numel(grid_lon(:, 1)), numel(grid_lat(1, :)), numel(tsteps));
 
 %%%% Determine points inside satellite FoV %%%% 

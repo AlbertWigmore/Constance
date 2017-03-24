@@ -13,7 +13,14 @@ sat2.RAAN = 200;
 sat2.AOP = 360;
 sat2.TA = 180;
 
-x = [sat1, sat2];
+sat3.SMA= 6878;
+sat3.ECC = 0;
+sat3.INC = 98;
+sat3.RAAN = 245;
+sat3.AOP = 360;
+sat3.TA = 180;
+
+x = [sat1, sat2, sat3];
 
 coverage = ObjFunc(x);
 
