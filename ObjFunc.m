@@ -37,7 +37,13 @@ fov = 10; % FoV of sensor
 
 tsteps = [0:0.001:0.1];
 for i = 1:numel(sat)
-    [S_lat, S_lon, rmag] = OrbitProp(tsteps, sat(i));
+    try
+        [S_lat, S_lon, rmag] = OrbitProp(tsteps, sat(i));
+    catch OrbitPropError
+        disp(OrbitPropError)
+        phi = 100; % Maximum value that can exist
+        return 
+    end
     out = CoverageCalc(S_lat, S_lon, rmag, sat(i), grid_lat, grid_lon, ...
                        tsteps, fov, earth);
     coverage = coverage + out.coverage;
