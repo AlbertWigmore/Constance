@@ -20,7 +20,9 @@ sat3.RAAN = 245;
 sat3.AOP = 360;
 sat3.TA = 180;
 
-x = [sat1, sat2, sat3];
+x = [sat1.SMA sat1.ECC sat1.INC sat1.RAAN sat1.AOP sat1.TA ...
+     sat2.SMA sat2.ECC sat2.INC sat2.RAAN sat2.AOP sat2.TA ...
+     sat3.SMA sat3.ECC sat3.INC sat3.RAAN sat3.AOP sat3.TA];
 
 coverage = ObjFunc(x);
 
