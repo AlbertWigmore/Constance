@@ -41,7 +41,7 @@ for i = 1:numel(sat)
         [S_lat, S_lon, rmag] = OrbitProp(tsteps, sat(i));
     catch OrbitPropError
         disp(OrbitPropError)
-        phi = 100; % Maximum value that can exist
+        phi = 0; % Maximum value that can exist
         return 
     end
     out = CoverageCalc(S_lat, S_lon, rmag, sat(i), grid_lat, grid_lon, ...
@@ -59,4 +59,4 @@ p = overlap; % Penalty function
 
 phi = f + p;
 
-% phi = coverage;
+% phi = coverage; % This is required for plotting
