@@ -1,4 +1,4 @@
-%%%% GA Optimisation %%%%
+%%%% PS Optimisation %%%%
 
 %%%% Decision Variables %%%%
 sat1.SMA= 6878;
@@ -24,28 +24,21 @@ sat3.TA = 180;
 
 %%%% Optimisation %%%%
 nvars = 18;
-A = [];
-b = [];
-Aeq = [];
-beq = [];
 lb = [6378 0 0 0 0 0 ...
       6378 0 0 0 0 0 ...
       6378 0 0 0 0 0];
 ub = [9000 0.1 90 360 360 360 ...
       9000 0.1 90 360 360 360 ...
       9000 0.1 90 360 360 360];
-nonlcon = [];
 
 x0 = [sat1.SMA sat1.ECC sat1.INC sat1.RAAN sat1.AOP sat1.TA ...
       sat2.SMA sat2.ECC sat2.INC sat2.RAAN sat2.AOP sat2.TA ...
       sat3.SMA sat3.ECC sat3.INC sat3.RAAN sat3.AOP sat3.TA];
   
-fun = @(x)ObjFunc(x);
+options = optimoptions('particleswarm', 'UseParallel', 1, 'SwarmSize', 20, ...
+                       'PlotFcn', {@pswplotbestf});
 
-options = gaoptimset('UseParallel', 1, 'PopulationSize', 20, ...
-                     'PlotFcn', {@gaplotdistance, @gaplotbestindiv, ...
-                                 @gaplotscores, @gaplotgenealogy});
-[x, fval, exitflag, output, population, scores] = ...
-ga(fun, nvars, A, b, Aeq, beq, lb, ub, nonlcon, options);
+fun = @(x)ObjFunc(x);
+[x, fval, exitflag, output] = particleswarm(fun, nvars, lb, ub, options);
 
 coverage = ObjFunc(x)
