@@ -22,7 +22,6 @@ sat3.AOP = x(17);
 sat3.TA = x(18);
 
 sat = [sat1, sat2, sat3];
-
 % Decision variables x
 
 %%%% Setup Coverage Parameters  %%%%
