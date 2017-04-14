@@ -2,8 +2,9 @@ function [Cost] = SatCost(SatelliteStruct)
 % Costing function of a satellite given its orbital parameters (in struct)
 
     % Set up estimate SMAs and masses for LEO and GEO for reference
-    m_LEO = 4000; % kg; mass of a typical LEO satellite
-    m_GEO = 8000; % kg; mass of a typical GEO satellite
+    % COSTING IS REALLY SENSITIVE TO THIS
+    m_LEO = 5000; % kg; mass of a typical LEO satellite
+    m_GEO = 9000; % kg; mass of a typical GEO satellite
     SMA_LEO = 6771; % km; semi-major axis of LEO satellite
     SMA_GEO = 42164; % km; semi-major axis of GEO satellite
     
@@ -48,7 +49,7 @@ function [Cost] = SatCost(SatelliteStruct)
     SatelliteStruct.cost.launch = min(A5.cost,Soyuz.cost);
     
     %% Add a penalty for launching into an inclined orbit
-    penalty = SatelliteStruct.INC/180/10;
+    penalty = SatelliteStruct.INC/180/5;
     SatelliteStruct.cost.inclinationPenalty = SatelliteStruct.cost.launch*penalty;
     
     %% Estimate the cost of the imaging payload
