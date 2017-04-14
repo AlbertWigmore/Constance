@@ -1,0 +1,16 @@
+%%%% PS Optimisation %%%%
+nvars = 18;
+lb = [6378 0 0 0 0 0 ...
+      6378 0 0 0 0 0 ...
+      6378 0 0 0 0 0];
+ub = [9000 0.1 90 360 360 360 ...
+      9000 0.1 90 360 360 360 ...
+      9000 0.1 90 360 360 360];
+  
+options = optimoptions('particleswarm', 'UseParallel', 1, 'SwarmSize', 20, ...
+                       'PlotFcn', {@pswplotbestf});
+
+fun = @(x)ObjFunc(x);
+[x, fval, exitflag, output] = particleswarm(fun, nvars, lb, ub, options);
+
+coverage = ObjFunc(x)

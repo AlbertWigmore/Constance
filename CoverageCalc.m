@@ -1,9 +1,21 @@
-function ret = CoverageCalc(sat_lat, sat_lon, sat_alt, sat, grid_lat, grid_lon, coverage, tsteps, fov, earth);
+function ret = CoverageCalc(sat_lat, sat_lon, sat_alt, sat, grid_lat, grid_lon, tsteps, fov, earth);
 %%%% Satellite View %%%%
 az = linspace(0, 360, 36);
+
+%%%% Calculated FoV that miss Earth %%%%
+fov = fov * ones(1, numel(sat_lat));
+max_fov = atand(6353./(sat_alt+6353));
+try
+   fov(fov > max_fov) = max_fov;
+catch exception
+   % Ignore the warning, just means no FoV's where altered
+end
+
+%%%% Calculate Latitude and Longitude Points on Ground
 [gnd_lat, gnd_lon] = lookAtSpheroid(sat_lat, sat_lon, sat_alt, ...
                                     (ones(numel(sat_lat), 1) * az)', ... 
                                     fov, earth);
+coverage = zeros(numel(grid_lon(:, 1)), numel(grid_lat(1, :)));
 time = NaN(numel(grid_lon(:, 1)), numel(grid_lat(1, :)), numel(tsteps));
 
 %%%% Determine points inside satellite FoV %%%% 
@@ -63,7 +75,7 @@ orbit = 2*pi*sqrt((sat.SMA*1000)^3/3.986E14)/60/60/24;
 
 % Calculate all points that are visited multiple times
 time = sort(time, 3);
-time_diff = (time(:, :, 2:end) - time(:, :, 1:end-1)) > 0.5 * orbit;
+time_diff = (time(:, :, 2:end) - time(:, :, 1:end-1)) > 0.9 * orbit;
 coverage = coverage + sum(time_diff(:, :, :), 3);
 
 ret.coverage = coverage;

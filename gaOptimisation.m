@@ -1,0 +1,23 @@
+%%%% GA Optimisation %%%%
+nvars = 18;
+A = [];
+b = [];
+Aeq = [];
+beq = [];
+lb = [6378 0 0 0 0 0 ...
+      6378 0 0 0 0 0 ...
+      6378 0 0 0 0 0];
+ub = [9000 0.1 90 360 360 360 ...
+      9000 0.1 90 360 360 360 ...
+      9000 0.1 90 360 360 360];
+nonlcon = [];
+ 
+fun = @(x)ObjFunc(x);
+
+options = gaoptimset('UseParallel', 1, 'PopulationSize', 20, ...
+                     'PlotFcn', {@gaplotdistance, @gaplotbestindiv, ...
+                                 @gaplotscores, @gaplotgenealogy});
+[x, fval, exitflag, output, population, scores] = ...
+ga(fun, nvars, A, b, Aeq, beq, lb, ub, nonlcon, options);
+
+coverage = ObjFunc(x)
