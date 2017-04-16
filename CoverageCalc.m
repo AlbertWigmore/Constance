@@ -6,7 +6,7 @@ az = linspace(0, 360, 36);
 fov = fov * ones(1, numel(sat_lat));
 max_fov = atand(6353./(sat_alt+6353));
 try
-   fov(fov > max_fov) = max_fov;
+   fov(fov > max_fov) = max_fov(fov > max_fov);
 catch exception
    % Ignore the warning, just means no FoV's where altered
 end
