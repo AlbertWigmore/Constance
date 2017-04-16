@@ -1,4 +1,4 @@
-function [lat,lon,r] = OrbitProp(timeseries,sat)
+function [nu,lat,lon,r] = OrbitProp(timeseries,sat)
     %  Returns lat (deg), long (deg), earth radius
     %  magnitude given time series (s) and orbital elements SMA, ECC, INC,
     %  RAAN, AOP, TA. Inputs in km and deg.
