@@ -1,4 +1,4 @@
-function [lat,lon,r] = OrbitProp(timeseries,sat)
+function [nu,lat,lon,r] = OrbitProp(timeseries,sat)
     %  Returns lat (deg), long (deg), earth radius
     %  magnitude given time series (s) and orbital elements SMA, ECC, INC,
     %  RAAN, AOP, TA. Inputs in km and deg.
@@ -11,7 +11,7 @@ function [lat,lon,r] = OrbitProp(timeseries,sat)
     TA = deg2rad(sat.TA);
     
     % Setup initial mean anomaly
-    E0 = atan2(sqrt(1+sat.ECC)*sin(TA),sqrt(1-sat.ECC)*cos(TA));
+    E0 = acos((sat.ECC+cos(TA))/(1+sat.ECC*cos(TA)));
     M0 = wrapTo2Pi(E0 - sat.ECC*sin(E0));
 
     % EARTH DATA
@@ -49,7 +49,7 @@ function [lat,lon,r] = OrbitProp(timeseries,sat)
         end
         E=E(end);
 
-    nu(iii) = 2*atan(sqrt(1+sat.ECC)/sqrt(1-sat.ECC)*tan(E/2));
+    nu(iii) = wrapTo2Pi(2*atan(sqrt(1+sat.ECC)/sqrt(1-sat.ECC)*tan(E/2)));
     r(iii) = sat.SMA*(1-sat.ECC^2)/(1+sat.ECC*cos(nu(iii)));
     if r(iii) <= R_e
         error('Orbit intersects with planet! Change SMA and/or ECC')
