@@ -49,7 +49,7 @@ function [nu,lat,lon,r] = OrbitProp(timeseries,sat)
         end
         E=E(end);
 
-    nu(iii) = 2*atan(sqrt(1+sat.ECC)/sqrt(1-sat.ECC)*tan(E/2));
+    nu(iii) = wrapTo2Pi(2*atan(sqrt(1+sat.ECC)/sqrt(1-sat.ECC)*tan(E/2)));
     r(iii) = sat.SMA*(1-sat.ECC^2)/(1+sat.ECC*cos(nu(iii)));
     if r(iii) <= R_e
         error('Orbit intersects with planet! Change SMA and/or ECC')
