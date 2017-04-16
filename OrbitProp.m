@@ -11,7 +11,7 @@ function [nu,lat,lon,r] = OrbitProp(timeseries,sat)
     TA = deg2rad(sat.TA);
     
     % Setup initial mean anomaly
-    E0 = atan2(sqrt(1+sat.ECC)*sin(TA),sqrt(1-sat.ECC)*cos(TA));
+    E0 = acos((sat.ECC+cos(TA))/(1+sat.ECC*cos(TA)));
     M0 = wrapTo2Pi(E0 - sat.ECC*sin(E0));
 
     % EARTH DATA
