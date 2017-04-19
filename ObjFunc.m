@@ -25,8 +25,8 @@ sat = [sat1, sat2, sat3];
 % Decision variables x
 
 %%%% Setup Coverage Parameters  %%%%
-e_lat_size = 300;
-e_lon_size = 300;
+e_lat_size = 100;
+e_lon_size = 100;
 e_lat = linspace(-90, 90, e_lat_size + 2);
 e_lon = linspace(-180, 180, e_lon_size + 2);
 [grid_lat, grid_lon] = meshgrid(e_lat, e_lon);
@@ -41,7 +41,7 @@ for i = 1:numel(sat)
         [tsteps_new, nu_new, S_lat_new, S_lon_new, rmag_new] = SelectiveTime(tsteps, nu, S_lat, S_lon, rmag, 5);
     catch OrbitPropError
         disp(OrbitPropError)
-        phi = 0; % Maximum value that can exist
+        phi = 400; % It is not known whether this is high enough
         return 
     end
     out = CoverageCalc(S_lat_new, S_lon_new, rmag_new, sat(i), grid_lat, grid_lon, ...
@@ -77,9 +77,9 @@ end
 
 f(1) = overlap; % Objective 1: Minimise overlap
 f(2) = sum(cost) / 1E6; % Objective 2: Minimise cost
-a = [1, 1]; % Weighting coefficients
+a = [1., 1.]; % Weighting coefficients
 
 % Pseudo Objective Function
-phi = a(1) * f(1) + a(2) * f(2) + p;
+phi = f(1) + f(2) + p;
 
-phi = coverage; % This is required for plotting
+% phi = coverage; % This is required for plotting
