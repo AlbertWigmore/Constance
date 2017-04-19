@@ -75,8 +75,11 @@ for k = 1:numel(h)
     p = p + h(k)^2;
 end
 
-f = overlap; % Cost function
+f(1) = overlap; % Objective 1: Minimise overlap
+f(2) = sum(cost) / 1E6; % Objective 2: Minimise cost
+a = [1, 1]; % Weighting coefficients
 
-phi = f + p;
+% Pseudo Objective Function
+phi = a(1) * f(1) + a(2) * f(2) + p;
 
 phi = coverage; % This is required for plotting
