@@ -48,7 +48,8 @@ for i = 1:numel(sat)
                        tsteps_new, fov, earth);
     coverage = coverage + out.coverage;
     cost(i) = SatCost(sat(i));
-%     rper(i) = sat(i).SMA * ((1 - sat(i).ECC^2) / (1 + sat(i).ECC));
+%     rper(i) = sat(i).SMA * ((1 - sat(i).ECC^2) / (1 + sat(i).ECC)); %
+%     Dont need this anymore!
 end
 
 % Coverage and overlap calculation
@@ -64,6 +65,7 @@ p = 0;
 g = cost ./ 100E6; % Cost of each satellite must be less then 100 million
 g = [g, (95 - area)/100]; % Coverage greater than 95% 
 % g = [g, (500 - rper)/500]; % No radius of perigee less then 500 km
+%     Dont need this anymore!
 
 for j = 1:numel(g)
     p = p + (max(0, g(j)))^2;
@@ -82,4 +84,4 @@ a = [1., 1.]; % Weighting coefficients
 % Pseudo Objective Function
 phi = f(1) + f(2) + p;
 
-phi = coverage; % This is required for plotting
+% phi = coverage; % This is required for plotting
