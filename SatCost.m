@@ -9,20 +9,21 @@ function [Cost] = SatCost(SatelliteStruct)
     SMA_GEO = 42164; % km; semi-major axis of GEO satellite
     
     %% Evaluate mass of sat by linear best fit
-    SatelliteStruct.p = polyfit([SMA_LEO,SMA_GEO],[m_LEO,m_GEO],1);
-    SatelliteStruct.m = polyval(SatelliteStruct.p,SatelliteStruct.SMA);
+    SMA = (SatelliteStruct.Ra+SatelliteStruct.Rp)/2;
+    p = polyfit([SMA_LEO,SMA_GEO],[m_LEO,m_GEO],1);
+    Sat_m = polyval(p,SMA);
     
     %% Estimate launch cost of Soyuz
     Soyuz.masstoLEO = 9000;
     Soyuz.masstoGEO = 3250;
     Soyuz.p = polyfit([SMA_LEO,SMA_GEO],[Soyuz.masstoLEO,Soyuz.masstoGEO],1);
                % (assuming linear variation of launchable mass with SMA...)
-    Soyuz.masstoChosenOrbit = polyval(Soyuz.p,SatelliteStruct.SMA);
+    Soyuz.masstoChosenOrbit = polyval(Soyuz.p,SMA);
     % Allow a reduction if more than 3/5 of capacity is left unused
-    if SatelliteStruct.m < 3/5*Soyuz.masstoChosenOrbit
-        Soyuz.cost = SatelliteStruct.m/Soyuz.masstoChosenOrbit...
+    if Sat_m < 3/5*Soyuz.masstoChosenOrbit
+        Soyuz.cost = Sat_m/Soyuz.masstoChosenOrbit...
             *70e6;
-    elseif SatelliteStruct.m <= Soyuz.masstoChosenOrbit
+    elseif Sat_m <= Soyuz.masstoChosenOrbit
         Soyuz.cost = 70e6;
     else
         Soyuz.cost = 1e100; % Cannot be launched
@@ -33,13 +34,13 @@ function [Cost] = SatCost(SatelliteStruct)
     A5.masstoGEO = 10730;
     A5.p = polyfit([SMA_LEO,SMA_GEO],[A5.masstoLEO,A5.masstoGEO],1);
                % (assuming linear variation of launchable mass with SMA...)
-    A5.masstoChosenOrbit = polyval(A5.p,SatelliteStruct.SMA);
-    A5.masstoChosenOrbit = polyval(A5.p,SatelliteStruct.SMA);
+    A5.masstoChosenOrbit = polyval(A5.p,SMA);
+    A5.masstoChosenOrbit = polyval(A5.p,SMA);
     % Allow a reduction if more than 3/5 of capacity is left unused
-    if SatelliteStruct.m < 3/5*A5.masstoChosenOrbit
-        A5.cost = SatelliteStruct.m/A5.masstoChosenOrbit...
+    if Sat_m < 3/5*A5.masstoChosenOrbit
+        A5.cost = Sat_m/A5.masstoChosenOrbit...
             *120e6;
-    elseif SatelliteStruct.m <= A5.masstoChosenOrbit
+    elseif Sat_m <= A5.masstoChosenOrbit
         A5.cost = 120e6;
     else
         A5.cost = 1e20; % Cannot be launched
@@ -53,13 +54,13 @@ function [Cost] = SatCost(SatelliteStruct)
     SatelliteStruct.cost.inclinationPenalty = SatelliteStruct.cost.launch*penalty;
     
     %% Estimate the cost of the imaging payload
-    if SatelliteStruct.SMA < 7371   
+    if SMA < 7371   
         % LEO payloads less intense optics = cheaper yay
         SatelliteStruct.cost.payload = 5e6;
-    elseif SatelliteStruct.SMA < 26371
+    elseif SMA < 26371
         % MEO payloads reasonable optics = meh
         SatelliteStruct.cost.payload = 7e6;
-    elseif SatelliteStruct.SMA < SMA_GEO
+    elseif SMA < SMA_GEO
         % GEO dorra dorra
         SatelliteStruct.cost.payload = 12e6;
     else

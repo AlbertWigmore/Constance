@@ -9,10 +9,12 @@ function [nu,lat,lon,r] = OrbitProp(timeseries,sat)
     AOP0 = deg2rad(sat.AOP);
     RAAN0 = deg2rad(sat.RAAN);
     TA = deg2rad(sat.TA);
+    SMA = (sat.Rp+sat.Ra)/2;
+    ECC = (sat.Ra-sat.Rp)/(sat.Rp+sat.Ra);
     
     % Setup initial mean anomaly
-    E0 = acos((sat.ECC+cos(TA))/(1+sat.ECC*cos(TA)));
-    M0 = wrapTo2Pi(E0 - sat.ECC*sin(E0));
+    E0 = acos((ECC+cos(TA))/(1+ECC*cos(TA)));
+    M0 = wrapTo2Pi(E0 - ECC*sin(E0));
 
     % EARTH DATA
     J2 = 0.00108263;
@@ -25,7 +27,7 @@ function [nu,lat,lon,r] = OrbitProp(timeseries,sat)
     lamb_gw_0 = deg2rad(lamb_gw_deg_0);
     
     % Orbital period
-    N = sqrt(mu/sat.SMA^3)/(2*pi)*86400;
+    N = sqrt(mu/SMA^3)/(2*pi)*86400;
 
     
     % Loop over time series
@@ -39,8 +41,8 @@ function [nu,lat,lon,r] = OrbitProp(timeseries,sat)
         diff = 1;
         ii = 1;
         while diff > 1e-6
-            fE = E(ii)-sat.ECC*sin(E(ii))-M;
-            dfE = 1-sat.ECC*cos(E(ii));
+            fE = E(ii)-ECC*sin(E(ii))-M;
+            dfE = 1-ECC*cos(E(ii));
 
             E(ii+1)=E(ii)-fE/dfE;
 
@@ -49,19 +51,19 @@ function [nu,lat,lon,r] = OrbitProp(timeseries,sat)
         end
         E=E(end);
 
-    nu(iii) = wrapTo2Pi(2*atan(sqrt(1+sat.ECC)/sqrt(1-sat.ECC)*tan(E/2)));
-    r(iii) = sat.SMA*(1-sat.ECC^2)/(1+sat.ECC*cos(nu(iii)));
+    nu(iii) = wrapTo2Pi(2*atan(sqrt(1+ECC)/sqrt(1-ECC)*tan(E/2)));
+    r(iii) = SMA*(1-ECC^2)/(1+ECC*cos(nu(iii)));
     if r(iii) <= R_e
         error('Orbit intersects with planet! Change SMA and/or ECC')
     end
 
     lamb_gw(iii) = wrapTo2Pi(lamb_gw_0 + We*T_now);
     
-    RAAN(iii) = wrapTo2Pi(RAAN0 - 3/2*J2*(R_e/sat.SMA)^2*N*2*pi*...
-        (1-sat.ECC^2)^(-2)*cos(INC)*(T_now-T_Ep));
+    RAAN(iii) = wrapTo2Pi(RAAN0 - 3/2*J2*(R_e/SMA)^2*N*2*pi*...
+        (1-ECC^2)^(-2)*cos(INC)*(T_now-T_Ep));
 
-    AOP(iii) = wrapTo2Pi(AOP0 + 3/2*J2*(R_e/sat.SMA)^2*N*2*pi*...
-        (1-sat.ECC^2)^(-2)*(2-5/2*sin(INC)^2)*(T_now-T_Ep));
+    AOP(iii) = wrapTo2Pi(AOP0 + 3/2*J2*(R_e/SMA)^2*N*2*pi*...
+        (1-ECC^2)^(-2)*(2-5/2*sin(INC)^2)*(T_now-T_Ep));
 
     iii=iii+1;
     end

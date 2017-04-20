@@ -3,12 +3,14 @@ close all
 clear
 
 inc = linspace(0,120,50);
-sma = linspace(earthRadius()/1000+450,earthRadius()/1000+50000,80);
+Ra = linspace(6378+450,6378+100000,80);
+TestSat.Rp = 6378+450;
+sma = (Ra+TestSat.Rp)/2;
 
 for i = 1:numel(inc)
     for j = 1:numel(sma)
         TestSat.INC = inc(i);
-        TestSat.SMA = sma(j);
+        TestSat.Ra = Ra(j);
         cost(i,j) = SatCost(TestSat);
     end
 end

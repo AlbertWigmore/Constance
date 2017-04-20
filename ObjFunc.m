@@ -1,21 +1,21 @@
 function [phi] = ObjFunc(x)
 
-sat1.SMA= x(1);
-sat1.ECC = x(2);
+sat1.Ra= x(1);
+sat1.Rp = x(2);
 sat1.INC = x(3);
 sat1.RAAN = x(4);
 sat1.AOP = x(5);
 sat1.TA = x(6);
 
-sat2.SMA= x(7);
-sat2.ECC = x(8);
+sat2.Ra= x(7);
+sat2.Rp = x(8);
 sat2.INC = x(9);
 sat2.RAAN = x(10);
 sat2.AOP = x(11);
 sat2.TA = x(12);
 
-sat3.SMA= x(13);
-sat3.ECC = x(14);
+sat3.Ra= x(13);
+sat3.Rp = x(14);
 sat3.INC = x(15);
 sat3.RAAN = x(16);
 sat3.AOP = x(17);
@@ -25,8 +25,8 @@ sat = [sat1, sat2, sat3];
 % Decision variables x
 
 %%%% Setup Coverage Parameters  %%%%
-e_lat_size = 100;
-e_lon_size = 100;
+e_lat_size = 150;
+e_lon_size = 150;
 e_lat = linspace(-90, 90, e_lat_size + 2);
 e_lon = linspace(-180, 180, e_lon_size + 2);
 [grid_lat, grid_lon] = meshgrid(e_lat, e_lon);
@@ -38,7 +38,7 @@ tsteps = [0:0.001:0.1];
 for i = 1:numel(sat)
     try
         [nu, S_lat, S_lon, rmag] = OrbitProp(tsteps, sat(i));
-        [tsteps_new, nu_new, S_lat_new, S_lon_new, rmag_new] = SelectiveTime(tsteps, nu, S_lat, S_lon, rmag, 5);
+        [tsteps_new, ~, S_lat_new, S_lon_new, rmag_new] = SelectiveTime(tsteps, nu, S_lat, S_lon, rmag, 5);
     catch OrbitPropError
         disp(OrbitPropError)
         phi = 400; % It is not known whether this is high enough
@@ -48,7 +48,8 @@ for i = 1:numel(sat)
                        tsteps_new, fov, earth);
     coverage = coverage + out.coverage;
     cost(i) = SatCost(sat(i));
-    rper(i) = sat(i).SMA * ((1 - sat(i).ECC^2) / (1 + sat(i).ECC));
+%     rper(i) = sat(i).SMA * ((1 - sat(i).ECC^2) / (1 + sat(i).ECC)); %
+%     Dont need this anymore!
 end
 
 % Coverage and overlap calculation
@@ -63,7 +64,8 @@ p = 0;
 % Inequality constraints
 g = cost ./ 100E6; % Cost of each satellite must be less then 100 million
 g = [g, (95 - area)/100]; % Coverage greater than 95% 
-g = [g, (500 - rper)/500]; % No radius of perigee less then 500 km
+% g = [g, (500 - rper)/500]; % No radius of perigee less then 500 km
+%     Dont need this anymore!
 
 for j = 1:numel(g)
     p = p + (max(0, g(j)))^2;
