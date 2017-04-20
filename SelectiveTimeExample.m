@@ -3,8 +3,8 @@ close all
 clear all
 clc
 
-sat.SMA= 27000;
-sat.ECC = 0.7;
+sat.Ra= 6378+400;
+sat.Rp = 6378+26000;
 sat.INC = 60;
 sat.RAAN = 0;
 sat.AOP = 270;

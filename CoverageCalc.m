@@ -71,7 +71,8 @@ end
 coverage(coverage > 1) = 1;
 
 % Calculate orbit period in same units as time input
-orbit = 2*pi*sqrt((sat.SMA*1000)^3/3.986E14)/60/60/24;
+SMA = sat.Ra/2+sat.Rp/2;
+orbit = 2*pi*sqrt((SMA*1000)^3/3.986E14)/60/60/24;
 
 % Calculate all points that are visited multiple times
 time = sort(time, 3);

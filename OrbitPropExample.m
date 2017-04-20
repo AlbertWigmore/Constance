@@ -2,15 +2,15 @@ clear all
 clc
 close all
 
-sat1.SMA= 6878;
-sat1.ECC = 0;
+sat1.Ra= 6378+10800;
+sat1.Rp= 6378+450;
 sat1.INC = 98;
 sat1.RAAN = 201;
 sat1.AOP = 360;
 sat1.TA = 0;
 
-sat2.SMA= 26562;
-sat2.ECC = 0.74;
+sat2.Ra = 6378+2000;
+sat2.Rp = 6378+2000;
 sat2.INC = 63.4;
 sat2.RAAN = 0;
 sat2.AOP = 270;
@@ -28,7 +28,7 @@ hold on
 box on
 load coast
 plot(long, lat, 'k', 'LineWidth',0.2) % Plot coastlines
-plot(S_lon2,S_lat2,'b.')
+plot(S_lon1,S_lat1,'b.')
 
 axis equal
 axis([-180 180 -90 90])
