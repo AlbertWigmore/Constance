@@ -1,4 +1,4 @@
-function [phi] = MultiObjFunc(x)
+function [phi] = MultiObjFunc(x, a)
 
 sat1.Ra= x(1);
 sat1.Rp = x(2);
@@ -34,7 +34,7 @@ coverage = zeros(e_lon_size + 2, e_lat_size + 2);
 earth = wgs84Ellipsoid('km'); % Earth Ellipsoid based on WGS84 Model.
 fov = 65; % FoV of sensor
 
-tsteps = [0:0.001:0.5];
+tsteps = [0:0.001:0.01];
 for i = 1:numel(sat)
     [nu, S_lat, S_lon, rmag] = OrbitProp(tsteps, sat(i));
     [tsteps_new, ~, S_lat_new, S_lon_new, rmag_new] = SelectiveTime(tsteps, nu, S_lat, S_lon, rmag, 0.5);
@@ -54,7 +54,6 @@ overlap = 100 * (areamat(coverage > 1, R, earth) / 510.1E6);
 
 f(1) = -area; % Objective 1: Maximise Overlap
 f(2) = sum(cost) / 1E6; % Objective 2: Minimise cost
-a = 0.5; % Weighting coefficients
 
 % Pseudo Objective Function
 phi = a * f(1) + (1 - a) * f(2);
