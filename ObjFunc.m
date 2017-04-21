@@ -36,14 +36,9 @@ fov = 10; % FoV of sensor
 
 tsteps = [0:0.001:0.1];
 for i = 1:numel(sat)
-    try
-        [nu, S_lat, S_lon, rmag] = OrbitProp(tsteps, sat(i));
-        [tsteps_new, ~, S_lat_new, S_lon_new, rmag_new] = SelectiveTime(tsteps, nu, S_lat, S_lon, rmag, 5);
-    catch OrbitPropError
-        disp(OrbitPropError)
-        phi = 400; % It is not known whether this is high enough
-        return 
-    end
+    [nu, S_lat, S_lon, rmag] = OrbitProp(tsteps, sat(i));
+    [tsteps_new, ~, S_lat_new, S_lon_new, rmag_new] = SelectiveTime(tsteps, nu, S_lat, S_lon, rmag, 5);
+
     out = CoverageCalc(S_lat_new, S_lon_new, rmag_new, sat(i), grid_lat, grid_lon, ...
                        tsteps_new, fov, earth);
     coverage = coverage + out.coverage;
@@ -62,8 +57,8 @@ overlap = 100 * (areamat(coverage > 1, R, earth) / 510.1E6);
 p = 0;
 
 % Inequality constraints
-g = cost ./ 100E6; % Cost of each satellite must be less then 100 million
-g = [g, (95 - area)/100]; % Coverage greater than 95% 
+g = cost - 100E6; % Cost of each satellite must be less then 100 million
+g = [g, (95 - area)]; % Coverage greater than 95% 
 % g = [g, (500 - rper)/500]; % No radius of perigee less then 500 km
 %     Dont need this anymore!
 
