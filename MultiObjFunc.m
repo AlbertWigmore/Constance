@@ -34,10 +34,10 @@ coverage = zeros(e_lon_size + 2, e_lat_size + 2);
 earth = wgs84Ellipsoid('km'); % Earth Ellipsoid based on WGS84 Model.
 fov = 65; % FoV of sensor
 
-tsteps = [0:0.001:0.01];
+tsteps = [0:0.001:0.5];
 for i = 1:numel(sat)
     [nu, S_lat, S_lon, rmag] = OrbitProp(tsteps, sat(i));
-    [tsteps_new, ~, S_lat_new, S_lon_new, rmag_new] = SelectiveTime(tsteps, nu, S_lat, S_lon, rmag, 0.5);
+    [tsteps_new, ~, S_lat_new, S_lon_new, rmag_new] = SelectiveTime(tsteps, nu, S_lat, S_lon, rmag, 5);
 
     out = CoverageCalc(S_lat_new, S_lon_new, rmag_new, sat(i), grid_lat, grid_lon, ...
                        tsteps_new, fov, earth);
@@ -57,5 +57,5 @@ f(2) = sum(cost) / 1E6; % Objective 2: Minimise cost
 
 % Pseudo Objective Function
 phi = a * f(1) + (1 - a) * f(2);
-
+% phi = [f(1), f(2)];
 % phi = coverage; % This is required for plotting

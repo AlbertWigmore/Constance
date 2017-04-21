@@ -37,7 +37,7 @@ fov = 65; % FoV of sensor
 tsteps = [0:0.001:0.5];
 for i = 1:numel(sat)
     [nu, S_lat, S_lon, rmag] = OrbitProp(tsteps, sat(i));
-    [tsteps_new, ~, S_lat_new, S_lon_new, rmag_new] = SelectiveTime(tsteps, nu, S_lat, S_lon, rmag, 0.5);
+    [tsteps_new, ~, S_lat_new, S_lon_new, rmag_new] = SelectiveTime(tsteps, nu, S_lat, S_lon, rmag, 5);
 
     out = CoverageCalc(S_lat_new, S_lon_new, rmag_new, sat(i), grid_lat, grid_lon, ...
                        tsteps_new, fov, earth);
