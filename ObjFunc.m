@@ -32,9 +32,9 @@ e_lon = linspace(-180, 180, e_lon_size + 2);
 [grid_lat, grid_lon] = meshgrid(e_lat, e_lon);
 coverage = zeros(e_lon_size + 2, e_lat_size + 2);
 earth = wgs84Ellipsoid('km'); % Earth Ellipsoid based on WGS84 Model.
-fov = 50; % FoV of sensor
+fov = 65; % FoV of sensor
 
-tsteps = [0:0.001:0.1];
+tsteps = [0:0.001:0.5];
 for i = 1:numel(sat)
     [nu, S_lat, S_lon, rmag] = OrbitProp(tsteps, sat(i));
     [tsteps_new, ~, S_lat_new, S_lon_new, rmag_new] = SelectiveTime(tsteps, nu, S_lat, S_lon, rmag, 0.5);
@@ -65,4 +65,4 @@ f = sum(cost) / 1E6; % Objective 2: Minimise cost
 % Pseudo Objective Function
 phi = f + p;
 
-phi = coverage; % This is required for plotting
+% phi = coverage; % This is required for plotting
