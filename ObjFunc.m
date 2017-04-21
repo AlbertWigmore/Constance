@@ -25,19 +25,19 @@ sat = [sat1, sat2, sat3];
 % Decision variables x
 
 %%%% Setup Coverage Parameters  %%%%
-e_lat_size = 150;
-e_lon_size = 150;
+e_lat_size = 300;
+e_lon_size = 300;
 e_lat = linspace(-90, 90, e_lat_size + 2);
 e_lon = linspace(-180, 180, e_lon_size + 2);
 [grid_lat, grid_lon] = meshgrid(e_lat, e_lon);
 coverage = zeros(e_lon_size + 2, e_lat_size + 2);
 earth = wgs84Ellipsoid('km'); % Earth Ellipsoid based on WGS84 Model.
-fov = 10; % FoV of sensor
+fov = 50; % FoV of sensor
 
 tsteps = [0:0.001:0.1];
 for i = 1:numel(sat)
     [nu, S_lat, S_lon, rmag] = OrbitProp(tsteps, sat(i));
-    [tsteps_new, ~, S_lat_new, S_lon_new, rmag_new] = SelectiveTime(tsteps, nu, S_lat, S_lon, rmag, 5);
+    [tsteps_new, ~, S_lat_new, S_lon_new, rmag_new] = SelectiveTime(tsteps, nu, S_lat, S_lon, rmag, 0.5);
 
     out = CoverageCalc(S_lat_new, S_lon_new, rmag_new, sat(i), grid_lat, grid_lon, ...
                        tsteps_new, fov, earth);
@@ -79,4 +79,4 @@ a = [1., 1.]; % Weighting coefficients
 % Pseudo Objective Function
 phi = f(1) + f(2) + p;
 
-% phi = coverage; % This is required for plotting
+phi = coverage; % This is required for plotting

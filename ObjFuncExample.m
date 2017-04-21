@@ -1,5 +1,5 @@
 
-sat1.Ra= 6378+6000;
+sat1.Ra= 6378+500;
 sat1.Rp = 6378+400;
 sat1.INC = 98;
 sat1.RAAN = 110;
