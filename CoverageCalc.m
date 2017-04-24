@@ -76,7 +76,7 @@ orbit = 2*pi*sqrt((SMA*1000)^3/3.986E14)/60/60/24;
 
 % Calculate all points that are visited multiple times
 time = sort(time, 3);
-time_diff = (time(:, :, 2:end) - time(:, :, 1:end-1)) > 0.9 * orbit;
+time_diff = (time(:, :, 2:end) - time(:, :, 1:end-1)) > 0.7 * orbit;
 coverage = coverage + sum(time_diff(:, :, :), 3);
 
 ret.coverage = coverage;
